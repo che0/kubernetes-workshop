@@ -10,6 +10,9 @@ GKE create VPC-native (aby se dal spojit s MySQL)
 private kube cluster needs cloud nat for the nodes to get out - create cloud nat
     bacha na regiony
 
+service names
+    For example, if you have a Service called "my-service" in a Kubernetes Namespace called "my-ns", a DNS record for "my-service.my-ns" is created.
+    
 
 kubectl apply -f
  deploy

@@ -1,0 +1,51 @@
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: pokus-mysql
+spec:
+  serviceName: pokus-mysql
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pokus-mysql
+  template:
+    metadata:
+      name: pokus-mysql
+      labels:
+        app: pokus-mysql
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:5
+        args: ['--datadir', '/var/lib/mysql/datadir']
+        ports:
+        - name: mysql
+          containerPort: 3306
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "12345"
+        volumeMounts:
+        - name: mysql-volume
+          mountPath: "/var/lib/mysql"
+  volumeClaimTemplates:
+  - metadata:
+      name: mysql-volume
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 4Gi
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: open-mysql-loadbalancer
+spec:
+  selector:
+    app: pokus-mysql
+  ports:
+  - protocol: TCP
+    port: 3306
+    targetPort: 3306
+  type: ClusterIP
