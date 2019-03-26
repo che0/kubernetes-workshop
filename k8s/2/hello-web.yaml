@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-web
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hello-web
+  template:
+    metadata:
+      name: hello-web
+      labels:
+        app: hello-web
+    spec:
+      containers:
+      - name: flask
+        image: pn2d/hello-web:v2
+        ports:
+        - name: http
+          containerPort: 80
+        env:
+          - name: BACKEND_URL
+            value: "http://10.7.244.2/backend"
+        livenessProbe:
+          httpGet:
+            path: /alive
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 80
+          initialDelaySeconds: 20
+          periodSeconds: 10

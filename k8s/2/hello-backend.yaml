@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hello-backend
+  template:
+    metadata:
+      name: hello-backend
+      labels:
+        app: hello-backend
+    spec:
+      containers:
+      - name: backend
+        image: pn2d/hello-backend:v1
+        ports:
+        - name: http
+          containerPort: 80
