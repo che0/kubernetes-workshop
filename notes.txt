@@ -10,6 +10,8 @@ GKE create VPC-native (aby se dal spojit s MySQL)
 private kube cluster needs cloud nat for the nodes to get out - create cloud nat
     bacha na regiony
 
+    
+
 service names
     For example, if you have a Service called "my-service" in a Kubernetes Namespace called "my-ns", a DNS record for "my-service.my-ns" is created.
     
@@ -27,18 +29,40 @@ kubectl exec hello-678dc98cd7-q8gpk /bin/bash -ti
 ===
 Postup:
 1. Deployment tupe webovky na HTTP + LoadBalanceru se statickou IP
-2. Tupy backend + pripojeni pres ClusterIP + liveness + readiness
+2. Tupy backend + pripojeni pres ClusterIP a DNS alias + liveness + readiness
+3. Mene tupy backend s mysql a persistent volume
 
-3. Mene tupy backend s redisem jako cache https://kubernetes.io/docs/tutorials/stateless-application/guestbook/
+
+4. Hesla do MySQL v secrets
+
+
 4. Normalni webova aplikace (pod s nginx + uwsgi)
-5. MySQL databaze z cloudu, napojeni, secrets
+5. MySQL databaze, napojeni, secrets
 6. Cron joby
 7. Ingress + TLS
 
-
 ---
-blog: 
+blog:
 
 ===
 Finalni webovka:
 - mailove remindovatko?
+
+DB:
+user = mail + pw
+
+scheduled message = for user, timestamp, body
+sent notices = e-mail hash
+
+incoming ->
+    from known user -> add to list of messages
+    otherwise -> sent notice, add hash to sent notices
+
+views/actions:
+    register, login, logout, change pw
+    activate (confirm registration)
+    list reminders (with paging)
+    reminder detail
+    delete reminder
+    process incoming
+    send outgoing

@@ -4,7 +4,8 @@ metadata:
   name: hello-loadbalancer
 spec:
   selector:
-    app: hello-web
+    app: hello
+    what: frontend
   ports:
   - protocol: TCP
     port: 80

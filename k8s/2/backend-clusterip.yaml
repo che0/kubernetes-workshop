@@ -4,7 +4,8 @@ metadata:
   name: hello-backend
 spec:
   selector:
-    app: hello-backend
+    app: hello
+    what: backend
   ports:
   - protocol: TCP
     port: 80

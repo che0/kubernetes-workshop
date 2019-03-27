@@ -6,4 +6,5 @@ exec docker run -ti --rm \
     -v ${dir}/_gcloud/config:/config/mygcloud \
     -v ${dir}/_gcloud/certs:/certs \
     -v ${dir}/k8s:/k8s \
+    -v ${dir}/setup-scripts:/setup-scripts \
     google/cloud-sdk /bin/bash
