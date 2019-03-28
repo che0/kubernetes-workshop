@@ -37,9 +37,9 @@ Postup:
 2. Tupy backend + pripojeni pres ClusterIP a DNS alias + liveness + readiness
 3. Mene tupy backend s mysql a persistent volume
 4. Nastaveni v configmaps, hesla do MySQL v secrets
+5. Normalni webova aplikace (pod s nginx + uwsgi)
 
 
-4. Normalni webova aplikace (pod s nginx + uwsgi)
 6. Cron joby
 7. Ingress + TLS
 
