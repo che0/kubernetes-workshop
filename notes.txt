@@ -40,7 +40,6 @@ Postup:
 
 
 4. Normalni webova aplikace (pod s nginx + uwsgi)
-5. MySQL databaze, napojeni, secrets
 6. Cron joby
 7. Ingress + TLS
 
