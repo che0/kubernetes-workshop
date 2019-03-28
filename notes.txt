@@ -20,6 +20,11 @@ kubectl apply -f
  deploy
 
 
+Jak najit a pozabijet vsechny nebezici pody
+    kubectl get pod --field-selector status.phase!=Running
+    kubectl delete pod --field-selector status.phase!=Running
+
+
 kubectl run hello --image pn2d/hello-web --port=80 --replicas=1
 kubectl expose deploy hello --port 80 --target-port 80 --type=LoadBalancer --load-balancer-ip=35.227.18.251 --name=pub-hello2
 kubectl exec hello-678dc98cd7-q8gpk /bin/bash -ti
@@ -31,9 +36,7 @@ Postup:
 1. Deployment tupe webovky na HTTP + LoadBalanceru se statickou IP
 2. Tupy backend + pripojeni pres ClusterIP a DNS alias + liveness + readiness
 3. Mene tupy backend s mysql a persistent volume
-
-
-4. Hesla do MySQL v secrets
+4. Nastaveni v configmaps, hesla do MySQL v secrets
 
 
 4. Normalni webova aplikace (pod s nginx + uwsgi)
