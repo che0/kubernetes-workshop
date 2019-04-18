@@ -1,0 +1,81 @@
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: hello-db
+spec:
+  serviceName: hello-db
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hello
+      what: db
+  template:
+    metadata:
+      name: hello-db
+      labels:
+        app: hello
+        what: db
+    spec:
+      containers:
+      - name: mysql
+        image: percona:5
+        args:
+            - '--datadir=/var/lib/mysql'
+            - '--ignore-db-dir=lost+found'
+        ports:
+        - name: mysql
+          containerPort: 3306
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: hello-db-root-password
+              key: password
+        - name: MYSQL_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              name: hello-config
+              key: db.database
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: hello-db-passwords
+              key: username
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: hello-db-passwords
+              key: password
+        volumeMounts:
+        - name: hello-db-data
+          mountPath: "/var/lib/mysql"
+      initContainers:
+      - name: chown-datadir
+        image: busybox
+        command: ['sh', '-c', 'chown 999:999 /mnt/mysql-data']
+        volumeMounts:
+        - name: hello-db-data
+          mountPath: "/mnt/mysql-data"
+  volumeClaimTemplates:
+  - metadata:
+      name: hello-db-data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: hello-db
+spec:
+  selector:
+    app: hello
+    what: db
+  ports:
+  - protocol: TCP
+    port: 3306
+    targetPort: 3306
+  type: ClusterIP

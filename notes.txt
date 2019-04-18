@@ -24,6 +24,8 @@ Jak najit a pozabijet vsechny nebezici pody
     kubectl get pod --field-selector status.phase!=Running
     kubectl delete pod --field-selector status.phase!=Running
 
+Zmena configmapy se nedotkne bezici pody. Reseni: verzovat (hashem) configmapy, v deploymentech se odkazovat na specifickou verzi, a pak preposlat deploymenty.
+
 
 kubectl run hello --image pn2d/hello-web --port=80 --replicas=1
 kubectl expose deploy hello --port 80 --target-port 80 --type=LoadBalancer --load-balancer-ip=35.227.18.251 --name=pub-hello2
@@ -38,9 +40,9 @@ Postup:
 3. Mene tupy backend s mysql a persistent volume
 4. Nastaveni v configmaps, hesla do MySQL v secrets
 5. Normalni webova aplikace (pod s nginx + uwsgi)
-
-
 6. Cron joby
+
+
 7. Ingress + TLS
 
 ---

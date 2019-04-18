@@ -3,7 +3,7 @@ gcloud beta container --project "pokus-234611" \
     clusters create "my-cluster" \
         --zone "us-east1-c" \
         --no-enable-basic-auth \
-        --cluster-version "1.12.5-gke.5" \
+        --cluster-version "1.12.7-gke.7" \
         --machine-type "g1-small" \
         --image-type "COS" \
         --disk-type "pd-standard" \
