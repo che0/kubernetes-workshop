@@ -41,9 +41,10 @@ Postup:
 4. Nastaveni v configmaps, hesla do MySQL v secrets
 5. Normalni webova aplikace (pod s nginx + uwsgi)
 6. Cron joby
+7. Ingress
 
-
-7. Ingress + TLS
+8. TLS
+https://docs.cert-manager.io/en/latest/getting-started/install.html#installing-with-regular-manifests
 
 ---
 blog:
