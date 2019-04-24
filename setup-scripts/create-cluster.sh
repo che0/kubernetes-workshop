@@ -1,4 +1,5 @@
 #!/bin/bash
+set -ex
 gcloud beta container --project "pokus-234611" \
     clusters create "my-cluster" \
         --zone "us-east1-c" \
@@ -21,4 +22,5 @@ gcloud beta container --project "pokus-234611" \
         --subnetwork "projects/pokus-234611/regions/us-east1/subnetworks/default" \
         --default-max-pods-per-node "110" \
         --addons HorizontalPodAutoscaling,HttpLoadBalancing \
+        --no-issue-client-certificate \
         --enable-autoupgrade --enable-autorepair
