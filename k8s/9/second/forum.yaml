@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-forum
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hello
+      what: forum
+  template:
+    metadata:
+      name: hello-forum
+      labels:
+        app: hello
+        what: forum
+    spec:
+      containers:
+      - name: forum
+        image: pn2d/phpbb2-k8s
+        env:
+          - name: PHPBB_DB_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: hello-config
+                key: db.host
+          - name: PHPBB_DB_NAME
+            valueFrom:
+              configMapKeyRef:
+                name: hello-config
+                key: db.database
+          - name: PHPBB_DB_USER
+            valueFrom:
+              secretKeyRef:
+                name: hello-db-passwords
+                key: username
+          - name: PHPBB_DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: hello-db-passwords
+                key: password
+          - name: PHPBB_SERVER_NAME
+            value: forum.zbozi.fail
+          - name: PHPBB_SERVER_PORT
+            value: "443"
+          - name: PHPBB_USE_HTTPS
+            value: "1"
+          - name: PHPBB_X_FORWARDED_FOR_INDEX
+            value: "-2"
+        ports:
+        - name: http
+          containerPort: 80
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 70
+          periodSeconds: 10

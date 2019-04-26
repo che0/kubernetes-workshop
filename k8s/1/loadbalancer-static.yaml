@@ -1,7 +1,7 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: hello-loadbalancer-external
+  name: hello-loadbalancer
 spec:
   selector:
     app: hello-web
@@ -10,4 +10,4 @@ spec:
     port: 80
     targetPort: 80
   type: LoadBalancer
-  loadBalancerIP: "35.202.50.97"
+  loadBalancerIP: "X.X.X.X"

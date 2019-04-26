@@ -27,14 +27,24 @@ Jak najit a pozabijet vsechny nebezici pody
 Zmena configmapy se nedotkne bezici pody. Reseni: verzovat (hashem) configmapy, v deploymentech se odkazovat na specifickou verzi, a pak preposlat deploymenty.
 
 
-kubectl run hello --image pn2d/hello-web --port=80 --replicas=1
-kubectl expose deploy hello --port 80 --target-port 80 --type=LoadBalancer --load-balancer-ip=35.227.18.251 --name=pub-hello2
 kubectl exec hello-678dc98cd7-q8gpk /bin/bash -ti
+
+Ingressu (nebo asi cemukoliv na global external IP) muze trvat cca 10 minut nez se chyti (pokus 1: 8 minut 404, pak flapy cca minutu, pak uz stabilni 200)
+
+Aplikace TLS do Ingressu:
+    ~1051 nastaveno
+    1100 http prechazi do 404, na tls jsou uz jine chyby
+    1101 tls prechazi do 404
+    1105 na http se zacina objevovat backend
+    1106 backend uz je i na tls
 
 
 
 ===
 Postup:
+0. Tupa webovka + LoadBalancer pres command line
+    kubectl run hello --image pn2d/hello-web:v1 --port=80 --replicas=1
+    kubectl expose deploy hello --port 80 --target-port 80 --type=LoadBalancer --name=pub-hello
 1. Deployment tupe webovky na HTTP + LoadBalanceru se statickou IP
 2. Tupy backend + pripojeni pres ClusterIP a DNS alias + liveness + readiness
 3. Mene tupy backend s mysql a persistent volume
