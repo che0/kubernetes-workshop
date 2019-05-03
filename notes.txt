@@ -2,7 +2,7 @@ https://www.radishlogic.com/kubernetes/running-minikube-in-aws-ec2-ubuntu/
 
 
 ===
-GKE create VPC-native (aby se dal spojit s MySQL)
+GKE create VPC-native (aby se dal spojit s out-of-cluster MySQL)
     VPC-native
     private cluster
     needs external master ip
@@ -53,31 +53,4 @@ Postup:
 6. Cron joby
 7. Ingress
 8. TLS
-
 9. phpBB
-
----
-blog:
-
-===
-Finalni webovka:
-- mailove remindovatko?
-
-DB:
-user = mail + pw
-
-scheduled message = for user, timestamp, body
-sent notices = e-mail hash
-
-incoming ->
-    from known user -> add to list of messages
-    otherwise -> sent notice, add hash to sent notices
-
-views/actions:
-    register, login, logout, change pw
-    activate (confirm registration)
-    list reminders (with paging)
-    reminder detail
-    delete reminder
-    process incoming
-    send outgoing

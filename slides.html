@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>Kubernetes v praxi</title>
+    </head>
+    <body>
+
+<h1>Kubernetes v praxi</h1>
+
+<section class="slide">
+    <h2>Kubernetes v praxi</h2>
+    <p>Co to je, jak to funguje, jak to použít</p>
+    <p>Budete potřebovat Docker</p>
+</section>
+
+<section class="slide">
+    <h2>Docker</h2>
+    <p>Tvoří image a pouští kontejnery</p>
+    <ul>
+        <li>image je obraz systému, třeba aplikace se vším co potřebuje (knihovny a tak podobně)</li>
+        <li>kontejner spouštíte z image</li>
+        <li>kontejner běží izolovaný od hostitelského systému, může komunikovat přes síť nebo přes volumes</li>
+        <li>ekosystém rozličných imagů:<ul>
+            <li><code>$ docker run -ti --rm ubuntu /bin/bash</code></li>
+            <li><code>$ docker run -ti --rm debian grep ^deb /etc/apt/sources.list</code></li>
+            <li><code>$ docker run --name databaze --rm mariadb</code></li>
+        </ul></li>
+        <li>vrstvená tvorba přes <a href="https://github.com/che0/hello-web/blob/v1/Dockerfile">Dockerfile</a></li>
+        <li><code>$ docker run -ti --rm -p 8000:80 pn2d/hello-web:v1</code></li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2>Kubernetes</h2>
+    <ul>
+        <li>Open source cluster, který vám spouští kontejnery</li>
+        <li>Má API i klikátko, nejlíp se ovládá přes <code>kubectl</code></li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2></h2>
+    <code>
+0. Tupa webovka + LoadBalancer pres command line
+    kubectl run hello --image pn2d/hello-web:v1 --port=80 --replicas=1
+    kubectl expose deploy hello --port 80 --target-port 80 --type=LoadBalancer --name=pub-hello
+1. Deployment tupe webovky na HTTP + LoadBalanceru se statickou IP
+2. Tupy backend + pripojeni pres ClusterIP a DNS alias + liveness + readiness
+3. Mene tupy backend s mysql a persistent volume
+4. Nastaveni v configmaps, hesla do MySQL v secrets
+5. Normalni webova aplikace (pod s nginx + uwsgi)
+6. Cron joby
+7. Ingress
+8. TLS
+9. phpBB</code>
+</section>
+
+<section class="slide">
+    <h2>KTHXBAI</h2>
+</section>
+
+    <script src="https://ondras.github.io/jsslides/v3/slides/slides3.js" type="text/javascript"></script>
+    <script>
+        Slides.modules.skin = "seznam";
+        Slides.modules.progress.parent = "body";
+        Slides.modules.fontsize.normal = "200%";
+        Slides.modules.language = ["en", "cs"];
+        Slides.modules.time.parent = "body";
+        Slides.modules.time.remaining = 5 * 60 * 1000;
+    </script>
+
+</body>
+</html>
