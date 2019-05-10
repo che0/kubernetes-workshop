@@ -25,6 +25,7 @@
             <li><code>$ docker run -ti --rm ubuntu /bin/bash</code></li>
             <li><code>$ docker run -ti --rm debian grep ^deb /etc/apt/sources.list</code></li>
             <li><code>$ docker run --name databaze --rm mariadb</code></li>
+            <li><code>$ docker run -ti --rm -v "$(pwd)/php-site:/var/www/html" -p 8000:80 php:7.2-apache</code></li>
         </ul></li>
         <li>vrstvená tvorba přes <a href="https://github.com/che0/hello-web/blob/v1/Dockerfile">Dockerfile</a></li>
         <li><code>$ docker run -ti --rm -p 8000:80 pn2d/hello-web:v1</code></li>
@@ -40,11 +41,53 @@
 </section>
 
 <section class="slide">
+    <h2>Jednoduchý web</h2>
+    <ul>
+        <li>spustím si web<br>
+            <code>$ kubectl run hello --image pn2d/hello-web:v1 --port=80</code></li>
+        <li>potřebuju service která ho dostane ven<br>
+            <code>$ kubectl expose deploy hello --port 80 --target-port 80 --type=LoadBalancer --name=pub-hello</code><br>
+            případně <code>$ minikube service pub-hello --url</code></li>
+        <li>deploymenty můžu škálovat<br>
+            <code>$ kubectl scale --replicas=3 deploy hello</code>
+    </ul>
+    </code>
+</section>
+
+<section class="slide">
+    <h2>Jak se dá sahat na věci v Kubernetu</h2>
+    <ol>
+        <li>Imperativní příkazy: dělá věci co dostane v argumentech<ul><li><code>run</code>, <code>expose</code></li></ul></li>
+        <li>Imperativní konfigurace: vytvoří/přepíše věci podle souboru<ul>
+            <li><code>$ kubectl create -f web.yaml</code></li>
+            <li><code>$ kubectl replace -f web.yaml</code></li>
+        </ul></li>
+        <li>Deklarativní konfigurace: zjistí stav objektů, porovná je s argumentem a aplikuje změny<ul>
+            <li>funguje i když máte v objektech která nejdou změnit (různé IP adresy u loadbalancerů, které vám doplňuje cluster)</li>
+            <li><code>$ kubectl diff -f my-config</code></li>
+            <li><code>$ kubectl apply -f my-config</code></li>
+        </ul></li>
+    </ol>
+</section>
+
+<section class="slide">
+    <h2>Jednoduchý web (znovu)</h2>
+    <ul>
+        <li>k8s/1/hello-web.yaml</li>
+        <li>k8s/1/loadbalancer.yaml</li>
+        <li>můžete si říct o statickou IP adresu; postup jak ji získat záleží na vašem providerovi</li>
+    </ul>
+</section>
+
+    
+
+<section class="slide">
     <h2></h2>
     <code>
 0. Tupa webovka + LoadBalancer pres command line
     kubectl run hello --image pn2d/hello-web:v1 --port=80 --replicas=1
     kubectl expose deploy hello --port 80 --target-port 80 --type=LoadBalancer --name=pub-hello
+    minikube service pub-hello --url
 1. Deployment tupe webovky na HTTP + LoadBalanceru se statickou IP
 2. Tupy backend + pripojeni pres ClusterIP a DNS alias + liveness + readiness
 3. Mene tupy backend s mysql a persistent volume
