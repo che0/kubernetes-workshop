@@ -43,13 +43,15 @@
 <section class="slide">
     <h2>Jednoduchý web</h2>
     <ul>
-        <li>spustím si web<br>
-            <code>$ kubectl run hello --image pn2d/hello-web:v1 --port=80</code></li>
-        <li>potřebuju service která ho dostane ven<br>
+        <li>spustím si web<ul>
+            <li><code>$ kubectl run hello --image pn2d/hello-web:v1 --port=80</code></li>
+            <li>založí <em>deployment</em>, který se pak stará o <em>pody</em></li>
+            </ul></li>
+        <li>potřebuju <em>service</em> která ho web dostane ven<br>
             <code>$ kubectl expose deploy hello --port 80 --target-port 80 --type=LoadBalancer --name=pub-hello</code><br>
             případně <code>$ minikube service pub-hello --url</code></li>
         <li>deploymenty můžu škálovat<br>
-            <code>$ kubectl scale --replicas=3 deploy hello</code>
+            <code>$ kubectl scale --replicas=3 deploy hello</code></li>
     </ul>
     </code>
 </section>
@@ -79,7 +81,7 @@
     </ul>
 </section>
 
-    
+
 
 <section class="slide">
     <h2></h2>
