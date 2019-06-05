@@ -2,15 +2,15 @@
 <html>
     <head>
         <meta charset="utf-8" />
-        <title>Kubernetes v praxi</title>
+        <title>Jak spustit aplikaci v Kubernetu </title>
     </head>
     <body>
 
-<h1>Kubernetes v praxi</h1>
+<h1>Jak spustit aplikaci v Kubernetu </h1>
 
 <section class="slide">
-    <h2>Kubernetes v praxi</h2>
-    <p>Co to je, jak to funguje, jak to použít</p>
+    <h2>Jak spustit aplikaci v Kubernetu </h2>
+    <p>Co Kubernetes je, jak to funguje, jak to použít</p>
     <p>Budete potřebovat Docker</p>
 </section>
 
@@ -18,7 +18,7 @@
     <h2>Docker</h2>
     <p>Tvoří image a pouští kontejnery</p>
     <ul>
-        <li>image je obraz systému, třeba aplikace se vším co potřebuje (knihovny a tak podobně)</li>
+        <li>image je obraz systému, typicky nějaká aplikace se vším co potřebuje (knihovny, závislosti)</li>
         <li>kontejner spouštíte z image</li>
         <li>kontejner běží izolovaný od hostitelského systému, může komunikovat přes síť nebo přes volumes</li>
         <li>ekosystém rozličných imagů:<ul>
@@ -38,6 +38,13 @@
         <li>Open source cluster, který vám spouští kontejnery</li>
         <li>Má API i klikátko, nejlíp se ovládá přes <code>kubectl</code></li>
     </ul>
+    <h3>Kde takový cluster vzít?</h3>
+    <ul>
+        <li><a href="https://kariera.seznam.cz/">kariera.seznam.cz</a></li>
+        <li><a href="https://cloud.google.com/kubernetes-engine/">Google Kubernetes Engine</a> (za e-mail, telefon a číslo karty)</li>
+        <li><a href="https://aws.amazon.com/eks/">Amazon EKS</a> (asi podobné, ale složitější na naklikání)</li>
+        <li><a href="https://kubernetes.io/docs/setup/minikube/">minikube</a></li>
+    </ul>
 </section>
 
 <section class="slide">
@@ -47,7 +54,7 @@
             <li><code>$ kubectl run hello --image pn2d/hello-web:v1 --port=80</code></li>
             <li>založí <em>deployment</em>, který se pak stará o <em>pody</em></li>
             </ul></li>
-        <li>potřebuju <em>service</em> která ho web dostane ven<br>
+        <li>potřebuju <em>service</em> která web dostane ven<br>
             <code>$ kubectl expose deploy hello --port 80 --target-port 80 --type=LoadBalancer --name=pub-hello</code><br>
             případně <code>$ minikube service pub-hello --url</code></li>
         <li>deploymenty můžu škálovat<br>
@@ -65,7 +72,7 @@
             <li><code>$ kubectl replace -f web.yaml</code></li>
         </ul></li>
         <li>Deklarativní konfigurace: zjistí stav objektů, porovná je s argumentem a aplikuje změny<ul>
-            <li>funguje i když máte v objektech která nejdou změnit (různé IP adresy u loadbalancerů, které vám doplňuje cluster)</li>
+            <li>funguje i když máte v objektech pole co nejdou změnit (třeba IP adresy u loadbalancerů)</li>
             <li><code>$ kubectl diff -f my-config</code></li>
             <li><code>$ kubectl apply -f my-config</code></li>
         </ul></li>
@@ -77,20 +84,18 @@
     <ul>
         <li>k8s/1/hello-web.yaml</li>
         <li>k8s/1/loadbalancer.yaml</li>
-        <li>můžete si říct o statickou IP adresu; postup jak ji získat záleží na vašem providerovi</li>
+        <li>můžete si říct o statickou IP adresu; postup jak ji získat záleží na providerovi</li>
     </ul>
 </section>
 
-
+<section class="slide">
+    <h2>Co když potřebuju backend?</h2>
+    
+</section>
 
 <section class="slide">
     <h2></h2>
     <code>
-0. Tupa webovka + LoadBalancer pres command line
-    kubectl run hello --image pn2d/hello-web:v1 --port=80 --replicas=1
-    kubectl expose deploy hello --port 80 --target-port 80 --type=LoadBalancer --name=pub-hello
-    minikube service pub-hello --url
-1. Deployment tupe webovky na HTTP + LoadBalanceru se statickou IP
 2. Tupy backend + pripojeni pres ClusterIP a DNS alias + liveness + readiness
 3. Mene tupy backend s mysql a persistent volume
 4. Nastaveni v configmaps, hesla do MySQL v secrets
