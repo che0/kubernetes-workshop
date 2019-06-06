@@ -253,11 +253,161 @@ spec:
     </ul>
 </section>
 
+<section class="slide">
+    <h2>Méně tupý backend</h2>
+    <ul>
+        <li>Měl by si věci opravdu pamatovat</li>
+        <li>Použijeme databázi</li>
+    </ul>
+    <h3>mysql.yaml</h3>
+    <pre>
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: hello-db
+spec:
+  serviceName: hello-db
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hello
+      what: db
+  template:
+    metadata:
+      name: hello-db
+      labels:
+        app: hello
+        what: db
+    spec:
+      containers:
+      - name: mysql
+        image: percona:5
+        ports:
+        - name: mysql
+          containerPort: 3306
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "12345"
+        - name: MYSQL_DATABASE
+          value: hellodb
+        - name: MYSQL_USER
+          value: hello_user
+        - name: MYSQL_PASSWORD
+          value: "aaa"
+    </pre>
+</section>
+
+<section class="slide">
+    <h2>Jak na databázi směrovat provoz</h2>
+    <h3>mysql.yaml (navíc)</h3>
+    <pre>
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: hello-db
+spec:
+  selector:
+    app: hello
+    what: db
+  ports:
+  - protocol: TCP
+    port: 3306
+    targetPort: 3306
+  clusterIP: None # žádný load balancing, jenom udělá DNS
+    </pre>
+    <ul>
+</section>
+
+<section class="slide">
+    <h2>Perzistence</h2>
+    <ul>
+        <li>někde v clusteru žijí <em>persistent volumes</em> (NFS, GlusterFS, HostPath, ...)</li>
+        <li>pody si je nárokují přes <em>persistent volume claims</em></li>
+    </ul>
+    <h3>mysql.yaml (ještě pořád)</h3>
+    <pre>
+kind: StatefulSet
+spec:
+  template:
+    spec:
+      containers:
+      - volumeMounts:
+        - name: hello-db-data
+          mountPath: "/var/lib/mysql"
+  volumeClaimTemplates:
+  - metadata:
+      name: hello-db-data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi
+    </pre>
+</section>
+
+<section class="slide">
+    <h2>MySQL workaround pro Google</h2>
+    <p>V Google Cloud je každý persistent volume samostatný ext4fs, který má <code>lost+found</code> a vlastníka, což MySQL nemá rádá.</p>
+    <h3>mysql.yaml (ještě pořád)</h3>
+    <pre>
+kind: StatefulSet
+spec:
+  template:
+    spec:
+      containers:
+      - args:
+            - '--datadir=/var/lib/mysql'
+            - '--ignore-db-dir=lost+found'
+      initContainers:
+      - name: chown-datadir
+        image: busybox
+        command: ['sh', '-c', 'chown 999:999 /mnt/mysql-data']
+        volumeMounts:
+        - name: hello-db-data
+          mountPath: "/mnt/mysql-data"
+    </pre>
+</section>
+
+<section class="slide">
+    <h2>Napojení backendu</h2>
+    <ul>
+        <li><a href="https://github.com/che0/hello-backend/blob/v2/backend.py">backend.py</a> co sahá do MySQL</li>
+        <li>nastavení zase přes env</li>
+    </ul>
+    <h3>backend.yaml (kus)</h3>
+    <pre>
+spec:
+  template:
+    spec:
+      containers:
+      - image: pn2d/hello-backend:v2
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 80
+          initialDelaySeconds: 20
+          periodSeconds: 10
+        env:
+          - name: MYSQL_HOST
+            value: hello-db
+          - name: MYSQL_DATABASE
+            value: hellodb
+          - name: MYSQL_USER
+            value: hello_user
+          - name: MYSQL_PASSWORD
+            value: "aaa"
+    </pre>
+</section>
+
+<section class="slide">
+    <h2>Konfigurace</h2>
+</section>
 
 <section class="slide">
     <h2></h2>
     <code>
-3. Mene tupy backend s mysql a persistent volume
 4. Nastaveni v configmaps, hesla do MySQL v secrets
 5. Normalni webova aplikace (pod s nginx + uwsgi)
 6. Cron joby
