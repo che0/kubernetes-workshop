@@ -22,13 +22,28 @@
         <li>kontejner spouštíte z image</li>
         <li>kontejner běží izolovaný od hostitelského systému, může komunikovat přes síť nebo přes volumes</li>
         <li>ekosystém rozličných imagů:<ul>
-            <li><code>$ docker run -ti --rm ubuntu /bin/bash</code></li>
-            <li><code>$ docker run -ti --rm debian grep ^deb /etc/apt/sources.list</code></li>
-            <li><code>$ docker run --name databaze --rm mariadb</code></li>
-            <li><code>$ docker run -ti --rm -v "$(pwd)/php-site:/var/www/html" -p 8000:80 php:7.2-apache</code></li>
+            <li><code>docker run -ti --rm ubuntu /bin/bash</code></li>
+            <li><code>docker run -ti --rm debian grep ^deb /etc/apt/sources.list</code></li>
+            <li><code>docker run --name databaze --rm mariadb</code></li>
+            <li><code>docker run -ti --rm -v "$(pwd)/php-site:/var/www/html" -p 8000:80 php:7.2-apache</code></li>
         </ul></li>
         <li>vrstvená tvorba přes <a href="https://github.com/che0/hello-web/blob/v1/Dockerfile">Dockerfile</a></li>
-        <li><code>$ docker run -ti --rm -p 8000:80 pn2d/hello-web:v1</code></li>
+        <li><code>docker run -ti --rm -p 8000:80 pn2d/hello-web:v1</code></li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2>Docker Hub</h2>
+    <ul>
+        <li><a href="hub.docker.com">hub.docker.com</a><ul>
+            <li>Default repository pro Docker image</li>
+            <li>1 privátní repository zdarma</li>
+            <li>Umí samo builtit image z GitHubu</li>
+        </ul></li>
+        <li>Jiný repository se píše jako prefix jména image<ul>
+            <li><code>docker run -ti --rm -p 8000:8080 gcr.io/google-samples/kubernetes-bootcamp:v1</code></li>
+        </ul></li>
+        <li>Můžete si spustit repository vlastní</li>
     </ul>
 </section>
 
@@ -36,7 +51,7 @@
     <h2>Kubernetes</h2>
     <ul>
         <li>Open source cluster, který vám spouští kontejnery</li>
-        <li>Má API i klikátko, nejlíp se ovládá přes <code>kubectl</code></li>
+        <li>Má API i klikátko, nejlíp se ovládá přes <code>kubectl</code> (dokud na něj chcete sahat)</li>
     </ul>
     <h3>Kde takový cluster vzít?</h3>
     <ul>
@@ -51,11 +66,14 @@
     <h2>Jednoduchý web</h2>
     <ul>
         <li>spustím si web<ul>
-            <li><code>$ kubectl run hello --image pn2d/hello-web:v1 --port=80</code></li>
+            <li><code>$ kubectl run hello-web --image pn2d/hello-web:v1 --port=80</code></li>
             <li>založí <em>deployment</em>, který se pak stará o <em>pody</em></li>
+            <li><code>kubectl get pods</code></li>
+            <li><code>kubectl port-forward ${pod} 8000:80</code></li>
+            <li><code>kubectl exec -ti ${pod} /bin/bash</code></li>
             </ul></li>
         <li>potřebuju <em>service</em> která web dostane ven<br>
-            <code>$ kubectl expose deploy hello --port 80 --target-port 80 --type=LoadBalancer --name=pub-hello</code><br>
+            <code>$ kubectl expose deploy hello-web --port 80 --target-port 80 --type=LoadBalancer --name=pub-hello</code><br>
             případně <code>$ minikube service pub-hello --url</code></li>
         <li>deploymenty můžu škálovat<br>
             <code>$ kubectl scale --replicas=3 deploy hello</code></li>
@@ -81,29 +99,174 @@
 
 <section class="slide">
     <h2>Jednoduchý web (znovu)</h2>
+    <h3>web.yaml</h3>
+    <pre>
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-web
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hello
+  template:
+    metadata:
+      name: hello-web
+      labels:
+        app: hello
+    spec:
+      containers:
+      - name: flask
+        image: pn2d/hello-web:v1
+        ports:
+        - name: http
+          containerPort: 80
+    </pre>
     <ul>
-        <li>k8s/1/hello-web.yaml</li>
-        <li>k8s/1/loadbalancer.yaml</li>
+        <li><code>kubectl create -f web.yaml</code> (taky <code>replace</code>, <code>delete</code>, <code>apply</code>)</li>
+        <li><code>kubectl rollout status -f web.yaml</code></li>
+    </ul>
+</section>
+    
+<section class="slide">
+    <h2>Jednoduchý web (znovu)</h2>
+    <h3>loadbalancer.yaml</h3>
+    <pre>
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-loadbalancer
+spec:
+  type: LoadBalancer
+  selector:
+    app: hello
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+  #loadBalancerIP: "X.X.X.X" # když chcete statickou
+    </pre>
+    <ul>
         <li>můžete si říct o statickou IP adresu; postup jak ji získat záleží na providerovi</li>
     </ul>
 </section>
 
 <section class="slide">
     <h2>Co když potřebuju backend?</h2>
-    
+    <p>Další skvělá komponenta: <a href="https://github.com/che0/hello-backend/blob/v1/backend.py">backend.py</a></p>
+    <h3>backend.yaml</h3>
+        <pre>
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hello
+      what: backend # bude potřeba si označit i front-end
+  template:
+    metadata:
+      name: hello-backend
+      labels:
+        app: hello
+        what: backend
+    spec:
+      containers:
+      - name: backend
+        image: pn2d/hello-backend:v1
+        ports:
+        - name: http
+          containerPort: 80
+        </pre>
 </section>
+
+<section class="slide">
+    <h2>Jak web backend najde?</h2>
+    <p><em>ClusterIP</em> &ndash; jedna IP adresa v rámci clusteru</p>
+    <h3>clusterip.yaml</h3>
+    <pre>
+kind: Service
+apiVersion: v1
+metadata:
+  name: hello-backend
+spec:
+  type: ClusterIP
+  selector:
+    app: hello
+    what: backend
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+    </pre>
+    <ul>
+        <li>Ke každé cluster IP DNS záznam zdarma</li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2>Jak web backend najde?</h2>
+    <p>Adresu <a href="https://github.com/che0/hello-web/blob/v2/app/hello.py#L29">předáme v env proměnné</a></p>
+    <h3>web.yaml (kousky)</h3>
+    <pre>
+spec:
+  template:
+    spec:
+      containers:
+      - image: pn2d/hello-web:v2
+        env:
+          - name: BACKEND_URL
+            value: "http://hello-backend/backend"
+    </pre>
+</section>
+
+<section class="slide">
+    <h2>Co když mi tam něco umře?</h2>
+    <h3>web.yaml (kousky)</h3>
+    <pre>
+spec:
+  template:
+    spec:
+      containers:
+      - livenessProbe:
+          httpGet:
+            path: /alive
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 1
+          failureThreshold: 1
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 1
+          failureThreshold: 1
+    </pre>
+    <ul>
+        <li><code>livenessProbe</code> = je to naživu (když není, Kubernetes kontejner restartuje)</li>
+        <li><code>readinessProbe</code> = reaguje to (když není, Kubernetes na pod nesměruje provoz)</li>
+        <li>kromě <code>httpGet</code> tam je i <code>exec</code> a <code>tcpSocket</code></li>
+    </ul>
+</section>
+
 
 <section class="slide">
     <h2></h2>
     <code>
-2. Tupy backend + pripojeni pres ClusterIP a DNS alias + liveness + readiness
 3. Mene tupy backend s mysql a persistent volume
 4. Nastaveni v configmaps, hesla do MySQL v secrets
 5. Normalni webova aplikace (pod s nginx + uwsgi)
 6. Cron joby
 7. Ingress
 8. TLS
-9. phpBB</code>
+9. phpBB
+https://web.archive.org/web/20020408094205/http://phpbb.com/features.php
+
+</code>
 </section>
 
 <section class="slide">
