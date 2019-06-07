@@ -1,6 +1,7 @@
 #!/bin/bash
+[ -n "${GCP_PROJECT}" ] || { echo 'Missing $GCP_PROJECT'; exit 1; }
 set -ex
-gcloud beta container --project "pokus-234611" \
+gcloud beta container --project "${GCP_PROJECT}" \
     clusters create "my-cluster" \
         --zone "us-east1-c" \
         --no-enable-basic-auth \
@@ -18,8 +19,8 @@ gcloud beta container --project "pokus-234611" \
         --master-ipv4-cidr "172.16.78.0/28" \
         --enable-master-authorized-networks --master-authorized-networks=0.0.0.0/0 \
         --enable-ip-alias \
-        --network "projects/pokus-234611/global/networks/default" \
-        --subnetwork "projects/pokus-234611/regions/us-east1/subnetworks/default" \
+        --network "projects/${GCP_PROJECT}/global/networks/default" \
+        --subnetwork "projects/${GCP_PROJECT}/regions/us-east1/subnetworks/default" \
         --default-max-pods-per-node "110" \
         --addons HorizontalPodAutoscaling,HttpLoadBalancing \
         --no-issue-client-certificate \

@@ -1,38 +1,38 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hello-web
+  name: hello-backend
 spec:
   replicas: 2
   selector:
     matchLabels:
       app: hello
-      what: frontend
+      what: backend
   template:
     metadata:
-      name: hello-web
+      name: hello-backend
       labels:
         app: hello
-        what: frontend
+        what: backend
     spec:
       containers:
-      - name: flask
-        image: pn2d/hello-web:v2
+      - name: backend
+        image: pn2d/hello-backend:v2
         ports:
         - name: http
           containerPort: 80
-        env:
-          - name: BACKEND_URL
-            value: "http://hello-backend/backend"
-        livenessProbe:
-          httpGet:
-            path: /alive
-            port: 80
-          initialDelaySeconds: 10
-          periodSeconds: 10
         readinessProbe:
           httpGet:
             path: /ready
             port: 80
           initialDelaySeconds: 20
           periodSeconds: 10
+        env:
+          - name: MYSQL_HOST
+            value: hello-db
+          - name: MYSQL_DATABASE
+            value: hellodb
+          - name: MYSQL_USER
+            value: hello_user
+          - name: MYSQL_PASSWORD
+            value: "aaa"

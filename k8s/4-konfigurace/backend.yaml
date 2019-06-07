@@ -36,17 +36,3 @@ spec:
             value: hello_user
           - name: MYSQL_PASSWORD
             value: "aaa"
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: hello-backend
-spec:
-  selector:
-    app: hello
-    what: backend
-  ports:
-  - protocol: TCP
-    port: 80
-    targetPort: 80
-  type: ClusterIP

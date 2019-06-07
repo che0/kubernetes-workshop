@@ -3,6 +3,7 @@ apiVersion: v1
 metadata:
   name: hello-backend
 spec:
+  type: ClusterIP
   selector:
     app: hello
     what: backend
@@ -10,4 +11,3 @@ spec:
   - protocol: TCP
     port: 80
     targetPort: 80
-  type: ClusterIP

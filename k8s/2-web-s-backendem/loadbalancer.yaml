@@ -1,12 +1,14 @@
-kind: Service
 apiVersion: v1
+kind: Service
 metadata:
   name: hello-loadbalancer
 spec:
+  type: LoadBalancer
   selector:
-    app: hello-web
+    app: hello
+    what: frontend
   ports:
   - protocol: TCP
     port: 80
     targetPort: 80
-  type: LoadBalancer
+  #loadBalancerIP: "X.X.X.X" # když chcete statickou

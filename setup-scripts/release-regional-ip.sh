@@ -1,3 +1,4 @@
 #!/bin/bash
+[ -n "${GCP_PROJECT}" ] || { echo 'Missing $GCP_PROJECT'; exit 1; }
 set -ex
-gcloud compute --project=pokus-234611 addresses delete my-static-address --region=us-east1
+gcloud compute --project=${GCP_PROJECT} addresses delete my-static-address --region=us-east1
