@@ -117,7 +117,7 @@
             <li><code>$ kubectl apply -f my-config</code></li>
         </ul></li>
     </ol>
-    <p>Na všechny objekty funguje <code>kubectl get</code>, <code>describe</code> a <code>delete</code>.</p>
+    <p>Na všechny objekty funguje <code>kubectl get</code>, <code>describe</code> a <code>delete</code>, a jde to i s <code>-f</code>.</p>
 </section>
 
 <section class="slide">
@@ -528,7 +528,7 @@ data:
 </section>
 
 <section class="slide">
-    <h2>Secrets &ndash; použití</h2>
+    <h2>Secrets</h2>
     <h3>backend.yaml</h3>
     <pre>
 spec:
@@ -547,12 +547,57 @@ spec:
     <p>Analogicky jdou doplnit do <code>envFrom</code> přes <code>secretRef</code> a jako volumes typu <code>secret</code>.</p>
 </section>
 
+<section class="slide">
+    <h2>WARNING: This is a development server. Do not use it in a production deployment.</h2>
+    <p>Webserver rozdělíme na <a href="https://github.com/che0/hello-web/blob/v3/proxy/Dockerfile">nginx proxy</a> a <a href="https://github.com/che0/hello-web/blob/v3/web/Dockerfile">uwsgi</a></p>
+    <h3>web.yaml (dva kontejnery)</h3>
+    <pre>
+spec:
+  template:
+    spec:
+      containers:
+      - name: web
+        image: pn2d/hello-web:v3-web
+        env:
+          - name: BACKEND_URL
+            valueFrom: ...
+      - name: proxy
+        image: pn2d/hello-web:v3-proxy
+        ports:
+        - name: http
+          containerPort: 80
+    </pre>
+</section>
+
+<section class="slide">
+    <h2>Jak ověřit že uwsgi funguje</h2>
+    <h3>web.yaml (kus kontejneru)</h3>
+    <pre>
+spec:
+  template:
+    spec:
+      containers:
+      - ...
+        livenessProbe:
+          exec:
+            command:
+              - uwping
+              - uwsgi://localhost:9090/alive
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+              - uwping
+              - uwsgi://localhost:9090/ready
+          initialDelaySeconds: 20
+          periodSeconds: 10
+    </pre>
+</section>
 
 <section class="slide">
     <h2>TBD</h2>
     <ul>
-        <li>4. Nastaveni v configmaps, hesla do MySQL v secrets</li>
-        <li>5. Normalni webova aplikace (pod s nginx + uwsgi)</li>
         <li>6. Cron joby</li>
         <li>7. Ingress</li>
         <li>8. TLS</li>

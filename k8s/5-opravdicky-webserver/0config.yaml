@@ -6,4 +6,3 @@ data:
   backend.url: "http://hello-backend/backend"
   db.host: hello-db
   db.database: hellodb
-

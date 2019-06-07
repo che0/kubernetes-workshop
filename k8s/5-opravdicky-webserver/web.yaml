@@ -55,18 +55,3 @@ spec:
             port: 80
           initialDelaySeconds: 20
           periodSeconds: 10
-
----
-kind: Service
-apiVersion: v1
-metadata:
-  name: hello-loadbalancer
-spec:
-  selector:
-    app: hello
-    what: frontend
-  ports:
-  - protocol: TCP
-    port: 80
-    targetPort: 80
-  type: LoadBalancer
