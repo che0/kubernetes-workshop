@@ -278,6 +278,10 @@ spec:
     </ul>
 </section>
 
+<section class="slide chapter">
+    <h2>Databáze v Kubernetu</h2>
+</section>
+
 <section class="slide">
     <h2>Méně tupý backend</h2>
     <ul>
@@ -428,6 +432,10 @@ spec:
     </pre>
 </section>
 
+<section class="slide chapter">
+    <h2>Konfigurace</h2>
+</section>
+
 <section class="slide">
     <h2>Konfigurace</h2>
     <p>Konfigurace se ukládá co <em>ConfigMaps</em>, což jsou vlastně key-value story</p>
@@ -547,8 +555,12 @@ spec:
     <p>Analogicky jdou doplnit do <code>envFrom</code> přes <code>secretRef</code> a jako volumes typu <code>secret</code>.</p>
 </section>
 
+<section class="slide chapter">
+    <h2>WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.</h2>
+</section>
+
 <section class="slide">
-    <h2>WARNING: This is a development server. Do not use it in a production deployment.</h2>
+    <h2>Produkční webserver</h2>
     <p>Webserver rozdělíme na <a href="https://github.com/che0/hello-web/blob/v3/proxy/Dockerfile">nginx proxy</a> a <a href="https://github.com/che0/hello-web/blob/v3/web/Dockerfile">uwsgi</a></p>
     <h3>web.yaml (dva kontejnery)</h3>
     <pre>
@@ -596,9 +608,72 @@ spec:
 </section>
 
 <section class="slide">
+    <h2>Cron joby</h2>
+    <h3>restart-job.yaml</h3>
+    <p><a href="https://github.com/che0/hello-backend/blob/v3/src/reset.py">Nová verze backendu</a> umí resetovat počítadlo</p>
+    <pre>
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: reset-counter
+spec:
+  schedule: "*/3 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: reset-counter
+              image: pn2d/hello-backend:v3
+              command: ["python3", "/app/reset.py"]
+              env:
+                - name: MYSQL_HOST
+                  valueFrom:
+                    configMapKeyRef:
+                      name: hello-config
+                      key: db.host
+                - name: MYSQL_DATABASE
+                  valueFrom:
+                    configMapKeyRef:
+                      name: hello-config
+                      key: db.database
+                - name: MYSQL_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: hello-db-passwords
+                      key: username
+                - name: MYSQL_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: hello-db-passwords
+                      key: password
+    </pre>
+</section>
+
+<section class="slide">
+    <h2>Informace o resetu</h2>
+    <p><a href="https://github.com/che0/hello-web/blob/v4/web/hello.py">web v4</a> umí vytáhnout info o posledním resetu</p>
+    <ul>
+        <li>pn2d/hello-backend:v3</li>
+        <li>pn2d/hello-web:v4-web</li>
+        <li>potom na webu funguje /reset-info</li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2>Rozličné informace k updatům</h2>
+    <ul>
+        <li>Kubernetes implicitne používá rolling updates: nejdřív zakládá nové pody, až když začnou fungovat odebírá původní</li>
+        <li>Lze přenastavit v Deployment spec, buď na "všechno zabít a udělat znovu" nebo volit parametry rolling update</li>
+        <li>Jednotlivé rollouty lze sledovat přes <code>kubectl rollout status deployment ${deployment}</code></li>
+        <li>Rollouty se dají i pozastavit nebo vracet</li>
+    </ul>
+</section>
+
+<section class="slide">
     <h2>TBD</h2>
     <ul>
-        <li>6. Cron joby</li>
         <li>7. Ingress</li>
         <li>8. TLS</li>
         <li>9. <a href="https://web.archive.org/web/20020408094205/http://phpbb.com/features.php">phpBB</a></li>

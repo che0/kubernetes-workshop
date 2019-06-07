@@ -38,6 +38,7 @@ spec:
               - uwsgi://localhost:9090/ready
           initialDelaySeconds: 20
           periodSeconds: 10
+        imagePullPolicy: Always
       - name: proxy
         image: pn2d/hello-web:v3-proxy
         ports:
@@ -56,17 +57,3 @@ spec:
           initialDelaySeconds: 20
           periodSeconds: 10
 
----
-kind: Service
-apiVersion: v1
-metadata:
-  name: hello-loadbalancer
-spec:
-  selector:
-    app: hello
-    what: frontend
-  ports:
-  - protocol: TCP
-    port: 80
-    targetPort: 80
-  type: LoadBalancer
