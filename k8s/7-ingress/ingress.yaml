@@ -1,0 +1,34 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: hello-ingress
+  annotations:
+    #kubernetes.io/ingress.global-static-ip-name: my-static-address
+    # ^ anotace vidí a mohou použít další procesy v clusteru
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /*
+        backend:
+          serviceName: hello-nodeport
+          servicePort: 80
+  tls:
+  - secretName: www-example-com-tls
+---
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: www-example-com
+spec:
+  secretName: www-example-com-tls
+  issuerRef:
+    name: letsencrypt-staging
+    kind: ClusterIssuer
+  commonName: www.example.com
+  acme:
+    config:
+    - http01:
+        ingress: hello-ingress
+      domains:
+      - www.example.com

@@ -4,7 +4,7 @@ metadata:
   name: letsencrypt-staging
 spec:
   acme:
-    email: pn+k8s-le@inkvizice.org
+    email: seznam-workshop@example.com
     server: https://acme-staging-v02.api.letsencrypt.org/directory
     # production server: https://acme-v01.api.letsencrypt.org/directory
     privateKeySecretRef:

@@ -1,0 +1,13 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: hello-backend
+spec:
+  type: ClusterIP
+  selector:
+    app: hello
+    what: backend
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80

@@ -38,6 +38,7 @@ spec:
               - uwsgi://localhost:9090/ready
           initialDelaySeconds: 20
           periodSeconds: 10
+        imagePullPolicy: Always
       - name: proxy
         image: pn2d/hello-web:v3-proxy
         ports:
@@ -55,3 +56,4 @@ spec:
             port: 80
           initialDelaySeconds: 20
           periodSeconds: 10
+

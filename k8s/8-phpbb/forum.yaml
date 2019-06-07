@@ -40,13 +40,11 @@ spec:
                 name: hello-db-passwords
                 key: password
           - name: PHPBB_SERVER_NAME
-            value: forum.zbozi.fail
+            value: forum.example.com
           - name: PHPBB_SERVER_PORT
-            value: "443"
+            value: "80"
           - name: PHPBB_USE_HTTPS
-            value: "1"
-          - name: PHPBB_X_FORWARDED_FOR_INDEX
-            value: "-2"
+            value: "0"
         ports:
         - name: http
           containerPort: 80

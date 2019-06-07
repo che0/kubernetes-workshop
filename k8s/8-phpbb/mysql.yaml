@@ -19,9 +19,6 @@ spec:
       containers:
       - name: mysql
         image: percona:5
-        args:
-            - '--datadir=/var/lib/mysql'
-            - '--ignore-db-dir=lost+found'
         ports:
         - name: mysql
           containerPort: 3306
@@ -49,6 +46,9 @@ spec:
         volumeMounts:
         - name: hello-db-data
           mountPath: "/var/lib/mysql"
+        args:
+            - '--datadir=/var/lib/mysql'
+            - '--ignore-db-dir=lost+found'
       initContainers:
       - name: chown-datadir
         image: busybox
@@ -56,6 +56,7 @@ spec:
         volumeMounts:
         - name: hello-db-data
           mountPath: "/mnt/mysql-data"
+
   volumeClaimTemplates:
   - metadata:
       name: hello-db-data
@@ -78,4 +79,4 @@ spec:
   - protocol: TCP
     port: 3306
     targetPort: 3306
-  type: ClusterIP
+  clusterIP: None # žádný load balancing, jenom udělá DNS

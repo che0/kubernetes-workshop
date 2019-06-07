@@ -672,16 +672,166 @@ spec:
 </section>
 
 <section class="slide">
-    <h2>TBD</h2>
+    <h2>Jak do clusteru dostat provoz</h2>
     <ul>
-        <li>7. Ingress</li>
-        <li>8. TLS</li>
-        <li>9. <a href="https://web.archive.org/web/20020408094205/http://phpbb.com/features.php">phpBB</a></li>
+        <li>LoadBalancer</li>
+        <li>NodePort</li>
+        <li>Ingress</li>
+        <li>buhvíco</li>
+    </ul>
+    
+    <h3>nodeport.yaml</h3>
+    <pre>
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-nodeport
+spec:
+  type: NodePort
+  selector:
+    app: hello
+    what: frontend
+  ports:
+  - protocol: TCP
+    port: 80
+    nodePort: 31000
+    </pre>
+</section>
+
+<section class="slide">
+    <h2>Ingress</h2>
+    <p>Ingress spravuje externí přístup do clusteru. Typicky terminuje a load balancuje HTTP/HTTPS.</p>
+    <h3>ingress.yaml</h3>
+    <pre>
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: hello-ingress
+  annotations:
+    #kubernetes.io/ingress.global-static-ip-name: my-static-address
+    # ^ anotace vidí a mohou použít další procesy v clusteru
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /*
+        backend:
+          serviceName: hello-nodeport
+          servicePort: 80
+    </pre>
+</section>
+
+<section class="slide">
+    <h2>TLS s Let's Encrypt v GKE</h2>
+    <p>Potřebujet do clusteru <a href="https://docs.cert-manager.io/en/latest/getting-started/install/kubernetes.html">nainstalovat</a> <a href="https://github.com/jetstack/cert-manager/">rozšíření cert-manager</a></p>
+    <h3>0clusterissuer.yaml</h3>
+    <pre>
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging
+spec:
+  acme:
+    email: seznam-workshop@example.com
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    # production server: https://acme-v01.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: letsencrypt-staging-account-key
+    http01: {}
+    </pre>
+</section>
+
+<section class="slide">
+    <h2>TLS pro Ingress v GKE</h2>
+    <h3>inguress.yaml (kus)</h3>
+    <pre>
+kind: Ingress
+spec:
+  tls:
+  - secretName: www-example-com-tls
+---
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: www-example-com
+spec:
+  secretName: www-example-com-tls
+  issuerRef:
+    name: letsencrypt-staging
+    kind: ClusterIssuer
+  commonName: www.example.com
+  acme:
+    config:
+    - http01:
+        ingress: hello-ingress
+      domains:
+      - www.example.com
+    </pre>
+</section>
+
+<section class="slide">
+    <h2>Jak převést starou aplikaci</h2>
+    <ul>
+        <li>smířte se s nevyhnutelností smrti</li>
+        <li>zbavte se stavu (session, nahrávané soubory)</li>
+        <li>načítejte konfiguraci z envu (nebo podstrkávejte soubory)</li>
     </ul>
 </section>
 
 <section class="slide">
-    <h2>KTHXBAI</h2>
+    <h2>phpBB 2.0</h2>
+    <ul>
+        <li>Vyšlo v dubnu 2002</li>
+        <li>Kompletní přepis původního phpBB 1.x</li>
+        <li>Seamless support of several database servers: MySQL 3.2x, PostgreSQL 7.x, Microsoft SQL Server 7/2000, Microsoft Access</li>
+        <li>Designed with security as a priority</li>
+        <li>Vývoj skončil v únoru 2009</li>
+        <li>Image pro Kubernetes: <a href="https://hub.docker.com/r/pn2d/phpbb2-k8s">pn2d/phpbb2-k8s</a> (<a href="https://github.com/che0/phpbb2-k8s">Dockerfile</a>)</li>
+    </ul>
+</section>
+
+<section class="slide">
+    <h2>phpBB 2.0 v Kubernetu</h2>
+    <h3>forum.yaml</h3>
+    <pre>
+spec:
+  template:
+    spec:
+      containers:
+      - name: forum
+        image: pn2d/phpbb2-k8s
+        env:
+          - name: PHPBB_DB_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: hello-config
+                key: db.host
+          - name: PHPBB_DB_NAME
+            valueFrom:
+              configMapKeyRef:
+                name: hello-config
+                key: db.database
+          - name: PHPBB_DB_USER
+            valueFrom:
+              secretKeyRef:
+                name: hello-db-passwords
+                key: username
+          - name: PHPBB_DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: hello-db-passwords
+                key: password
+          - name: PHPBB_SERVER_NAME
+            value: forum.example.com
+          - name: PHPBB_SERVER_PORT
+            value: "80"
+          - name: PHPBB_USE_HTTPS
+            value: "0"    
+    </pre>
+</section>
+
+<section class="slide">
+    <h2>Konec</h2>
 </section>
 
     <script src="https://ondras.github.io/jsslides/v3/slides/slides3.js" type="text/javascript"></script>
