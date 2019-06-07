@@ -24,13 +24,25 @@ spec:
           containerPort: 3306
         env:
         - name: MYSQL_ROOT_PASSWORD
-          value: "12345"
+          valueFrom:
+            secretKeyRef:
+              name: hello-db-root-password
+              key: password
         - name: MYSQL_DATABASE
-          value: hellodb
+          valueFrom:
+            configMapKeyRef:
+              name: hello-config
+              key: db.database
         - name: MYSQL_USER
-          value: hello_user
+          valueFrom:
+            secretKeyRef:
+              name: hello-db-passwords
+              key: username
         - name: MYSQL_PASSWORD
-          value: "aaa"
+          valueFrom:
+            secretKeyRef:
+              name: hello-db-passwords
+              key: password
         volumeMounts:
         - name: hello-db-data
           mountPath: "/var/lib/mysql"

@@ -29,10 +29,22 @@ spec:
           periodSeconds: 10
         env:
           - name: MYSQL_HOST
-            value: hello-db
+            valueFrom:
+              configMapKeyRef:
+                name: hello-config
+                key: db.host
           - name: MYSQL_DATABASE
-            value: hellodb
+            valueFrom:
+              configMapKeyRef:
+                name: hello-config
+                key: db.database
           - name: MYSQL_USER
-            value: hello_user
+            valueFrom:
+              secretKeyRef:
+                name: hello-db-passwords
+                key: username
           - name: MYSQL_PASSWORD
-            value: "aaa"
+            valueFrom:
+              secretKeyRef:
+                name: hello-db-passwords
+                key: password

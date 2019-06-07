@@ -478,7 +478,6 @@ spec:
               name: hello-config
             prefix: FROM_FULL_CONFIGMAP_
     </pre>
-    <p>Konfigurace ve volume se aktualizuje hned co si toho pod všimne. Env proměnné se načítají jen při startu kontejneru, pak už se nemění.</p>
 </section>
 
 <section class="slide">
@@ -497,9 +496,57 @@ spec:
       - name: config-volume
         configMap:
           name: hello-config
+    </pre>
+    <ul>
+        <li>volume se aktualizuje hned co si pod všimne změny</li>
+        <li>env proměnné se načítají jen při startu kontejneru, potom už se nemění</li>
+    </ul>
+</section>
 
+<section class="slide">
+    <h2>Secrets</h2>
+    <p>Secrets jsou jako ConfigMapy, ale tajné</p>
+    <h3>0db-root-password.yaml</h3>
+    <pre>
+apiVersion: v1
+kind: Secret
+metadata:
+    name: hello-db-root-password
+data:
+    password: MTIzNDU=
+    </pre>
+    <h3>0db-passwords.yaml</h3>
+    <pre>
+apiVersion: v1
+kind: Secret
+metadata:
+    name: hello-db-passwords
+data:
+    username: aGVsbG9fdXNlcg==
+    password: YWFh
     </pre>
 </section>
+
+<section class="slide">
+    <h2>Secrets &ndash; použití</h2>
+    <h3>backend.yaml</h3>
+    <pre>
+spec:
+  template:
+    spec:
+      containers:
+      - ...
+        env:
+        - name: MYSQL_USER
+            valueFrom:
+              secretKeyRef:
+                name: hello-db-passwords
+                key: username
+        - ...
+    </pre>
+    <p>Analogicky jdou doplnit do <code>envFrom</code> přes <code>secretRef</code> a jako volumes typu <code>secret</code>.</p>
+</section>
+
 
 <section class="slide">
     <h2>TBD</h2>
